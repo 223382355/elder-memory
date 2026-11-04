@@ -1,0 +1,12 @@
+﻿services:
+  - name: elder-memory
+    buildCommand: npm install
+    startCommand: node server.js
+    env:
+      - key: ZHIPU_API_KEY
+        value: 03fe6d36dbaa49de8b40bf978624fadb.cjaoXy1RJaHH27NG
+      - key: VOLC_API_KEY
+        value: apikey-20261103100008-4gvf9
+    regions:
+      - singapore
+    plan: free
