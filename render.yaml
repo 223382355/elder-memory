@@ -1,7 +1,7 @@
-﻿services:
+services:
   - name: elder-memory
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: npm start
     env:
       - key: ZHIPU_API_KEY
         value: 03fe6d36dbaa49de8b40bf978624fadb.cjaoXy1RJaHH27NG

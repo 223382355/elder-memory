@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head>
+<html lang="zh-CN">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>家人的记忆</title>
@@ -161,7 +162,7 @@
   <div id="loadingBox" class="loading">正在加载…</div>
 
   <div id="contentBox" style="display:none;">
-    <video id="videoPlayer" controls=""></video>
+    <video id="videoPlayer" controls></video>
 
     <div class="meta-box">
       <span class="meta-style" id="styleTag"></span>
@@ -176,7 +177,9 @@
     <div class="input-row">
       <textarea id="textInput" placeholder="说点什么送给爸爸妈妈…" rows="1"></textarea>
       <button class="btn btn-primary" onclick="sendText()">发送</button>
-      <button id="voiceBtn" class="btn btn-voice" onmousedown="startVoice()" onmouseup="stopVoice()" onmouseleave="stopVoice()" ontouchstart="event.preventDefault();startVoice()" ontouchend="event.preventDefault();stopVoice()">
+      <button id="voiceBtn" class="btn btn-voice"
+              onmousedown="startVoice()" onmouseup="stopVoice()" onmouseleave="stopVoice()"
+              ontouchstart="event.preventDefault();startVoice()" ontouchend="event.preventDefault();stopVoice()">
         <span class="voice-icon">🎙️</span>
         <span class="voice-label" id="voiceLabel">按住说</span>
       </button>
@@ -365,6 +368,5 @@
   // 启动
   loadMemory();
 </script>
-
-
-</body></html>
+</body>
+</html>

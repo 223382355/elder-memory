@@ -1,13 +1,12 @@
-﻿{
+{
   "name": "elder-memory",
-  "version": "1.0.0",
-  "description": "老年人动态记忆视频",
+  "version": "2.0.0",
+  "description": "老年人随手拍→语音→动态视频→家人扫码留言",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "better-sqlite3": "^11.3.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "multer": "^1.4.5-lts.1"
