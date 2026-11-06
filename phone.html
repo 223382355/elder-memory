@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#fdf6ee">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>我的记忆</title>
+<script src="./qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+background:#fdf6ee;color:#3a2a1e;font-size:18px;line-height:1.6;
+padding:calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+overflow-x:hidden}
+.wrap{max-width:520px;margin:0 auto}
+h1{font-size:26px;text-align:center;margin:12px 0 8px;color:#5a3825;font-weight:700}
+h2{font-size:21px;margin:18px 0 10px;color:#5a3825;font-weight:700}
+.sub{text-align:center;color:#9b8a7c;font-size:16px;margin-bottom:8px}
+.card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 2px 10px rgba(120,80,40,.08)}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:60px;
+font-size:20px;font-weight:700;border:none;border-radius:16px;cursor:pointer;
+margin:12px 0;padding:12px 18px;text-decoration:none;color:inherit;
+font-family:inherit;transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.45;transform:none}
+.p{background:#e76f51;color:#fff;box-shadow:0 6px 16px rgba(231,111,81,.3)}
+.s{background:#f4a261;color:#fff;box-shadow:0 6px 16px rgba(244,162,97,.3)}
+.g{background:#fff;color:#5a3825;border:2px solid #e8b9a5}
+.hide{display:none!important}
+.screen{display:none;animation:fade .35s}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.preview{width:100%;border-radius:16px;overflow:hidden;background:#fff;margin:12px 0;box-shadow:0 4px 18px rgba(120,80,40,.12)}
+.preview img{width:100%;display:block;max-height:60vh;object-fit:contain}
+.recwrap{display:flex;justify-content:center;padding:10px 0}
+.rec{width:200px;height:200px;border-radius:50%;background:#e76f51;color:#fff;
+border:none;font-size:20px;font-weight:700;display:flex;flex-direction:column;
+align-items:center;justify-content:center;gap:6px;box-shadow:0 10px 26px rgba(231,111,81,.4);
+user-select:none;-webkit-user-select:none;touch-action:none;font-family:inherit}
+.rec.on{background:#d62828;transform:scale(1.05)}
+.rec .ico{font-size:44px}
+.rec .txt{font-size:19px}
+.tip{text-align:center;color:#9b8a7c;font-size:16px;margin-top:12px;min-height:24px}
+.textbox{background:#fff;border-radius:16px;padding:16px;font-size:19px;line-height:1.75;
+color:#4a3527;min-height:90px;box-shadow:0 2px 10px rgba(120,80,40,.08);word-break:break-word}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.sty{min-height:96px;border-radius:16px;border:3px solid transparent;background:#fff;
+font-size:19px;font-weight:700;color:#5a3825;cursor:pointer;font-family:inherit;
+display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.sty .e{font-size:30px}
+.sty.sel{border-color:#e76f51;background:#fef3ec;color:#e76f51}
+.load{padding:56px 20px;text-align:center}
+.spin{width:76px;height:76px;border-radius:50%;border:6px solid #f4d0b6;border-top-color:#e76f51;
+animation:sp 1s linear infinite;margin:0 auto 20px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.load .a{font-size:21px;font-weight:700;color:#5a3825}
+.load .b{font-size:15px;color:#9b8a7c;margin-top:6px}
+video{width:100%;border-radius:16px;background:#000;display:block}
+.qrbox{text-align:center;background:#fff;border-radius:18px;padding:20px;margin:12px 0}
+.qrbox canvas{max-width:100%;height:auto}
+.qrnote{font-size:14px;color:#9b8a7c;margin-top:10px;word-break:break-all}
+.meta{display:inline-block;background:#fef3ec;color:#e76f51;padding:3px 12px;
+border-radius:20px;font-size:14px;font-weight:700;margin-bottom:8px}
+.cm{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:10px;
+box-shadow:0 1px 6px rgba(120,80,40,.07)}
+.cm .hd{display:flex;justify-content:space-between;font-size:13px;color:#a8988a;margin-bottom:4px}
+.cm .au{color:#e76f51;font-weight:700}
+.cm .tx{font-size:17px;color:#4a3527;word-break:break-word}
+.cm audio{width:100%;margin-top:8px}
+.empty{text-align:center;color:#b3a496;font-size:17px;padding:30px 10px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+box-shadow:0 -3px 16px rgba(120,80,40,.12);z-index:50}
+.bar .row{display:flex;gap:8px;align-items:flex-end;max-width:520px;margin:0 auto}
+.bar textarea{flex:1;border:2px solid #f4a261;border-radius:12px;padding:10px;
+font-size:16px;font-family:inherit;resize:none;min-height:46px;max-height:110px;outline:none;color:#3a2a1e;background:#fff}
+.bar .sm{min-height:46px;border-radius:12px;border:none;font-size:16px;font-weight:700;
+padding:0 14px;background:#e76f51;color:#fff;font-family:inherit;white-space:nowrap}
+.bar .vb{min-width:58px;background:#f4a261;color:#fff;display:flex;flex-direction:column;
+align-items:center;justify-content:center;gap:0;padding:4px 8px;line-height:1.1}
+.bar .vb.on{background:#d62828}
+.bar .vb .i{font-size:20px}
+.bar .vb .l{font-size:11px}
+.hbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.icon{width:44px;height:44px;border-radius:50%;background:#fff;border:none;font-size:20px;
+box-shadow:0 2px 8px rgba(120,80,40,.12);cursor:pointer}
+.setrow{margin:14px 0}
+.setrow label{display:block;font-size:16px;font-weight:700;color:#5a3825;margin-bottom:6px}
+.setrow input{width:100%;min-height:52px;border:2px solid #e8d5c6;border-radius:12px;
+padding:10px 14px;font-size:16px;font-family:inherit;outline:none;color:#3a2a1e;background:#fff}
+.setrow input:focus{border-color:#e76f51}
+.setrow .h{font-size:13px;color:#a8988a;margin-top:5px;line-height:1.5}
+.badge{display:inline-block;font-size:12px;padding:2px 10px;border-radius:10px;
+background:#e8f5e9;color:#2e7d32;font-weight:700;margin-left:6px}
+.badge.off{background:#fdecea;color:#c62828}
+.mi{display:flex;gap:12px;background:#fff;border-radius:14px;padding:10px;margin-bottom:10px;
+box-shadow:0 1px 6px rgba(120,80,40,.08);cursor:pointer}
+.mi img{width:74px;height:74px;border-radius:10px;object-fit:cover;flex:none;background:#eee}
+.mi .in{flex:1;min-width:0}
+.mi .t{font-size:16px;font-weight:700;color:#5a3825;overflow:hidden;text-overflow:ellipsis;
+display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mi .d{font-size:13px;color:#a8988a;margin-top:4px}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);
+background:rgba(58,42,30,.92);color:#fff;padding:10px 18px;border-radius:22px;font-size:15px;
+z-index:200;max-width:88%;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ========== 首页 ========== -->
+<div id="scHome" class="screen on">
+  <div class="hbar">
+    <span></span>
+    <button class="icon" onclick="openSettings()">⚙️</button>
+  </div>
+  <h1>📸 拍一拍</h1>
+  <p class="sub">拍张照片，说段话<br>变成一个会动的记忆视频</p>
+
+  <label class="btn p" for="photoInput">📷 拍一张</label>
+  <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+
+  <h2>我的记忆 <span id="memCount" class="badge">0</span></h2>
+  <div id="memList"></div>
+
+  <div style="margin-top:28px">
+    <button class="btn g" onclick="showDemo()">👀 看看示例</button>
+  </div>
+</div>
+
+<!-- ========== 照片预览 ========== -->
+<div id="scPhoto" class="screen">
+  <h2>📷 拍得怎么样</h2>
+  <div class="preview"><img id="photoPrev" alt="照片"></div>
+  <button class="btn p" onclick="goRecord()">✅ 很好，继续说</button>
+  <button class="btn g" onclick="retake()">🔄 重拍一张</button>
+</div>
+
+<!-- ========== 录音 ========== -->
+<div id="scRec" class="screen">
+  <h2>🎙️ 说一段</h2>
+  <div class="preview"><img id="photoSmall" alt="照片" style="max-height:200px;object-fit:cover"></div>
+  <div class="recwrap">
+    <button id="recBtn" class="rec"><span class="ico">🎙️</span><span class="txt" id="recTxt">按住说话</span></button>
+  </div>
+  <p class="tip" id="recTip">按住下面的大圆按钮，讲讲这张照片的故事</p>
+  <button class="btn g" onclick="skipVoice()">不说了，直接下一步</button>
+</div>
+
+<!-- ========== 文字 + 风格 ========== -->
+<div id="scStyle" class="screen">
+  <h2>💬 你刚才说的是</h2>
+  <div class="textbox" id="recText">正在识别…</div>
+  <h2>🎨 选个风格</h2>
+  <div class="grid">
+    <button class="sty" data-s="文艺" onclick="pickStyle(this)"><span class="e">🌸</span>文艺</button>
+    <button class="sty" data-s="喜庆" onclick="pickStyle(this)"><span class="e">🎉</span>喜庆</button>
+    <button class="sty" data-s="美丽" onclick="pickStyle(this)"><span class="e">🌺</span>美丽</button>
+    <button class="sty" data-s="怀旧" onclick="pickStyle(this)"><span class="e">📻</span>怀旧</button>
+  </div>
+  <button id="genBtn" class="btn p" disabled onclick="doGenerate()">✨ 生成记忆视频</button>
+  <button class="btn g" onclick="goScreen('scRec')">🔙 重录一遍</button>
+</div>
+
+<!-- ========== 生成中 ========== -->
+<div id="scLoad" class="screen">
+  <div class="load">
+    <div class="spin"></div>
+    <div class="a">正在制作你的记忆…</div>
+    <div class="b" id="loadSub">照片 + 话语 + 风格 = 独一无二的视频</div>
+  </div>
+</div>
+
+<!-- ========== 结果 ========== -->
+<div id="scResult" class="screen">
+  <h2>🎉 做好啦</h2>
+  <video id="resultVideo" controls playsinline webkit-playsinline></video>
+  <a id="saveBtn" class="btn s" download="memory.mp4">📥 保存到手机</a>
+
+  <div class="qrbox">
+    <div style="font-size:17px;font-weight:700;color:#5a3825;margin-bottom:10px">📱 发给家人扫一扫</div>
+    <canvas id="qrCanvas"></canvas>
+    <div class="qrnote" id="qrNote"></div>
+    <button class="btn g" style="margin-top:12px" onclick="copyShare()">🔗 复制链接</button>
+  </div>
+
+  <button class="btn g" onclick="goHome()">🔄 再拍一个</button>
+</div>
+
+<!-- ========== 家人端 ========== -->
+<div id="scView" class="screen" style="padding-bottom:90px">
+  <div class="hbar">
+    <button class="icon" onclick="goHome()">🏠</button>
+    <button class="icon" onclick="openSettings()">⚙️</button>
+  </div>
+  <h1>💝 家人的记忆</h1>
+  <video id="viewVideo" controls playsinline webkit-playsinline></video>
+  <div class="card" style="margin-top:12px">
+    <span class="meta" id="viewStyle"></span>
+    <div id="viewText" style="font-size:18px;color:#4a3527"></div>
+  </div>
+  <h2>💬 留言 <span id="cmCount" class="badge">0</span></h2>
+  <div id="cmList"></div>
+</div>
+
+<!-- ========== 设置 ========== -->
+<div id="scSet" class="screen">
+  <h2>⚙️ 设置</h2>
+  <div class="card">
+    <div class="setrow">
+      <label>智谱 Key（语音转文字）</label>
+      <input id="setZhipu" type="password" placeholder="留空 = 使用示例文字" autocomplete="off">
+      <div class="h">去 bigmodel.cn 免费申请。只存在你这部手机里，不会上传。</div>
+    </div>
+    <div class="setrow">
+      <label>火山方舟 Key（图生视频）</label>
+      <input id="setVolc" type="password" placeholder="留空 = 使用示例视频" autocomplete="off">
+      <div class="h">去 console.volcengine.com/ark 申请，并开通 Seedance 模型。</div>
+    </div>
+    <div class="setrow">
+      <label>云端地址（可选，开了才能同步留言）</label>
+      <input id="setCloud" type="url" placeholder="例如 https://xxx.onrender.com" autocomplete="off">
+      <div class="h">填了之后，家人扫的码会指向这个服务器，评论会存进它的 SQLite 并能回传给你。<br>
+      <b>不填 = 纯本地模式</b>：留言只存在家人自己的手机里。</div>
+    </div>
+    <div class="h" id="setState" style="margin-top:8px"></div>
+  </div>
+  <button class="btn p" onclick="saveSettings()">💾 保存</button>
+  <button class="btn g" onclick="goHome()">返回</button>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- 底部评论栏（家人端专用） -->
+<div id="commentBar" class="bar hide">
+  <div class="row">
+    <textarea id="cmInput" rows="1" placeholder="说点什么…"></textarea>
+    <button class="sm" onclick="sendText()">发送</button>
+    <button id="voiceBtn" class="sm vb">
+      <span class="i">🎙️</span><span class="l" id="voiceLbl">按住说</span>
+    </button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* =====================================================================
+   老年人记忆视频 · 手机单文件版
+   - 全部数据存本机 localStorage（照片已压缩到 ~150KB）
+   - 可选"云端地址"，填了就自动走在线同步
+   ===================================================================== */
+
+const DEMO_TEXT = '今天天气真好，我在院子里拍了一张照片。这是我种了三十年的老槐树，每年夏天都在这里乘凉。';
+const DEMO_VIDEO = './demo.mp4';
+const STYLES = {
+  文艺: '文艺风格，画面唯美柔和，光影细腻，镜头缓缓推进，配优雅背景音乐。讲述：',
+  喜庆: '喜庆欢快风格，画面明亮热烈，色彩鲜艳，充满幸福感。讲述：',
+  美丽: '美丽动人的画面，高清质感，色彩饱满，自然流畅的动态效果。讲述：',
+  怀旧: '怀旧复古风格，暖色调，电影感滤镜，慢镜头，勾起岁月回忆。讲述：'
+};
+
+/* ---------- 本地存储 ---------- */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { toast('存储空间已满，请删掉一些旧记忆'); return false; } }
+};
+
+const KEYS = { settings: 'em.settings', memories: 'em.memories', comments: 'em.comments' };
+
+function getSettings() {
+  return Object.assign({ zhipu:'', volc:'', cloud:'' }, LS.get(KEYS.settings, {}));
+}
+function saveSettingsToLS(s) { LS.set(KEYS.settings, s); }
+
+function cloudBase() {
+  const s = getSettings();
+  const c = (s.cloud || '').trim().replace(/\/+$/, '');
+  if (c && /^https?:\/\//i.test(c)) return c;
+  // 自动检测：如果部署在公网（非 localhost/file），就用当前 origin 当后端
+  try {
+    const o = (location.origin || '').toLowerCase();
+    if (o && o !== 'null' && !o.startsWith('file') && !o.includes('localhost')) {
+      return o;
+    }
+  } catch (e) {}
+  return '';
+}
+
+/* ---------- 通用 ---------- */
+const $ = id => document.getElementById(id);
+let toastTimer = null;
+function toast(msg, ms) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('on'), ms || 2600);
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+function goScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  const el = $(id);
+  if (el) el.classList.add('on');
+  $('commentBar').classList.toggle('hide', id !== 'scView');
+  window.scrollTo(0, 0);
+}
+
+/* ---------- 状态 ---------- */
+const S = { photo:null, audioBlob:null, text:'', style:null, memory:null, viewId:null, viewing:null };
+
+/* ================= 首页 ================= */
+function renderMemoryList() {
+  const list = LS.get(KEYS.memories, []);
+  $('memCount').textContent = list.length;
+  if (!list.length) {
+    $('memList').innerHTML = '<div class="empty">还没有记忆，点上面的「拍一张」开始吧</div>';
+    return;
+  }
+  const allC = LS.get(KEYS.comments, {});
+  $('memList').innerHTML = list.slice().reverse().map(m => {
+    const n = (allC[m.id] || []).length;
+    // 云端模式优先显示云端评论数（离线时用本地缓存）
+    return `<div class="mi" onclick="openMemory('${m.id}')">
+      <img src="${m.thumb || ''}" alt="">
+      <div class="in">
+        <div class="t">${esc(m.text || '（没有文字）')}</div>
+        <div class="d">${m.style || ''} · ${fmtTime(m.created_at)} · 💬 ${n}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+function fmtTime(ts) {
+  const d = new Date(ts || Date.now());
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getMonth() + 1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function goHome() {
+  if (location.hash) {
+    try { history.replaceState(null, '', location.pathname + location.search); }
+    catch (e) { location.hash = ''; }
+  }
+  S.photo = null; S.audioBlob = null; S.text = ''; S.style = null;
+  renderMemoryList();
+  goScreen('scHome');
+}
+
+/* ================= 拍照 ================= */
+$('photoInput').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  try {
+    const dataUrl = await compressImage(f, 1080, 0.72);
+    S.photo = dataUrl;
+    $('photoPrev').src = dataUrl;
+    goScreen('scPhoto');
+  } catch (err) {
+    toast('照片处理失败：' + err.message);
+  }
+  e.target.value = '';
+});
+
+function compressImage(file, maxSide, quality) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      let { width: w, height: h } = img;
+      const k = Math.min(1, maxSide / Math.max(w, h));
+      w = Math.round(w * k); h = Math.round(h * k);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('图片读取失败')); };
+    img.src = url;
+  });
+}
+
+function retake() { $('photoInput').click(); }
+
+function goRecord() {
+  if (!S.photo) return retake();
+  $('photoSmall').src = S.photo;
+  $('recTip').textContent = '按住下面的大圆按钮，讲讲这张照片的故事';
+  goScreen('scRec');
+}
+
+/* ================= 录音 ================= */
+let mr = null, chunks = [], recording = false, recStart = 0;
+
+function pickMime() {
+  const c = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+  if (!window.MediaRecorder) return '';
+  for (const m of c) { try { if (MediaRecorder.isTypeSupported(m)) return m; } catch (e) {} }
+  return '';
+}
+
+async function startRec() {
+  if (recording) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    $('recTip').textContent = '这台手机的浏览器不支持录音，可以直接下一步';
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mime = pickMime();
+    mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    chunks = [];
+    mr.ondataavailable = ev => { if (ev.data && ev.data.size) chunks.push(ev.data); };
+    mr.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(chunks, { type: mr.mimeType || 'audio/webm' });
+      S.audioBlob = blob;
+      $('recBtn').classList.remove('on');
+      $('recTxt').textContent = '按住说话';
+      $('recTip').textContent = '⏳ 正在识别…';
+      handleRecognize(blob);
+    };
+    mr.start();
+    recording = true;
+    recStart = Date.now();
+    $('recBtn').classList.add('on');
+    $('recTxt').textContent = '松开 结束';
+    $('recTip').textContent = '正在录音… 松开结束';
+  } catch (err) {
+    $('recTip').textContent = '❌ 麦克风打不开：' + (err.message || err.name);
+    toast('没有麦克风权限。请在浏览器设置里允许麦克风。');
+  }
+}
+
+function stopRec() {
+  if (!recording) return;
+  recording = false;
+  const dur = Date.now() - recStart;
+  try { if (mr && mr.state !== 'inactive') mr.stop(); } catch (e) {}
+  if (dur < 400) {
+    $('recTip').textContent = '太短了，按住多说一会儿';
+  }
+}
+
+const recBtn = $('recBtn');
+recBtn.addEventListener('touchstart', e => { e.preventDefault(); startRec(); }, { passive: false });
+recBtn.addEventListener('touchend', e => { e.preventDefault(); stopRec(); }, { passive: false });
+recBtn.addEventListener('touchcancel', e => { e.preventDefault(); stopRec(); }, { passive: false });
+recBtn.addEventListener('mousedown', e => { e.preventDefault(); startRec(); });
+window.addEventListener('mouseup', () => stopRec());
+
+function skipVoice() {
+  S.text = '（没有语音，只有照片）';
+  $('recText').textContent = S.text;
+  goScreen('scStyle');
+}
+
+/* ================= 语音识别 ================= */
+async function handleRecognize(blob) {
+  let text = '', note = '';
+  const s = getSettings();
+
+  if (!blob || blob.size < 1000) {
+    text = '（没录到声音，可以重录）';
+  } else if (cloudBase()) {
+    try {
+      const fd = new FormData();
+      fd.append('audio', blob, 'a.webm');
+      const r = await fetch(cloudBase() + '/api/recognize', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (!r.ok || !d.text) throw new Error(d.error || '识别失败');
+      text = d.text;
+    } catch (e) {
+      note = '（云端识别失败，已用示例文字）';
+      text = DEMO_TEXT;
+    }
+  } else if (s.zhipu) {
+    try {
+      const b64 = await blobToB64(blob);
+      const body = new URLSearchParams({ model: 'glm-asr-2512', file_base64: b64 });
+      const r = await fetch('https://open.bigmodel.cn/api/paas/v4/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Bearer ' + s.zhipu.trim()
+        },
+        body: body.toString()
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.text) throw new Error(d.error?.message || ('HTTP ' + r.status));
+      text = d.text;
+    } catch (e) {
+      note = '（语音接口调用失败：' + e.message + '，已用示例文字）';
+      text = DEMO_TEXT;
+    }
+  } else {
+    note = '（未填智谱 Key，用示例文字）';
+    text = DEMO_TEXT;
+  }
+
+  S.text = text;
+  $('recText').textContent = text;
+  $('recTip').textContent = '识别完成';
+  if (note) toast(note, 3800);
+  goScreen('scStyle');
+}
+
+function blobToB64(blob) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const s = String(fr.result);
+      resolve(s.includes(',') ? s.split(',')[1] : s);
+    };
+    fr.onerror = () => reject(new Error('音频读取失败'));
+    fr.readAsDataURL(blob);
+  });
+}
+
+/* ================= 选风格 ================= */
+function pickStyle(btn) {
+  document.querySelectorAll('.sty').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  S.style = btn.dataset.s;
+  $('genBtn').disabled = false;
+}
+
+/* ================= 生成视频 ================= */
+async function doGenerate() {
+  if (!S.photo || !S.style) return;
+  goScreen('scLoad');
+  $('loadSub').textContent = '照片 + 话语 + 风格 = 独一无二的视频';
+
+  const s = getSettings();
+  const text = S.text || '一张老照片';
+  let result = null;
+
+  try {
+    if (cloudBase()) {
+      result = await genViaCloud(s.photo, text, S.style);
+    } else if (s.volc) {
+      result = await genViaArk(s.photo, text, S.style, s.volc.trim());
+    } else {
+      $('loadSub').textContent = '未填 Key，用示例视频演示…';
+      await sleep(1500);
+      result = { id: uid(), video_url: DEMO_VIDEO, demo: true };
+    }
+  } catch (e) {
+    console.warn('生成失败，降级到示例视频：', e);
+    $('loadSub').textContent = '生成失败，先用示例视频演示';
+    await sleep(1200);
+    result = { id: uid(), video_url: DEMO_VIDEO, demo: true, err: e.message };
+    toast('真视频生成失败：' + e.message, 4000);
+  }
+
+  saveMemory({
+    id: result.id || uid(),
+    text: text,
+    style: S.style,
+    video_url: result.video_url,
+    thumb: S.photo,
+    demo: !!result.demo,
+    created_at: Date.now()
+  }, result.video_url);
+
+  S.memory = LS.get(KEYS.memories, []).slice(-1)[0];
+  showResult(S.memory);
+}
+
+async function genViaCloud(image, text, style) {
+  const r = await fetch(cloudBase() + '/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image, text, style })
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+
+  // 演示模式：直接返回视频
+  if (d.video_url) return { id: d.memory_id, video_url: d.video_url };
+
+  // 异步模式：轮询任务状态，最长等 5 分钟
+  const id = d.memory_id;
+  if (!id) throw new Error('没有拿到任务 id');
+  for (let i = 0; i < 60; i++) {
+    await sleep(5000);
+    $('loadSub').textContent = `视频生成中… 已等待 ${(i + 1) * 5} 秒，请不要关掉页面`;
+    const pr = await fetch(cloudBase() + '/api/task/' + id);
+    if (!pr.ok) continue;
+    const pj = await pr.json();
+    if (pj.status === 'succeeded' && pj.video_url) return { id, video_url: pj.video_url };
+    if (pj.status === 'failed') throw new Error('视频生成失败，请重试');
+  }
+  throw new Error('等待超时（5分钟）');
+}
+
+async function genViaArk(image, text, style, key) {
+  const prompt = (STYLES[style] || '') + text;
+  const imageUrl = image.startsWith('data:image/') ? image : 'data:image/jpeg;base64,' + image;
+
+  const cr = await fetch('https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({
+      model: 'doubao-seedance-2-0-mini-260615',
+      content: [
+        { type: 'text', text: prompt },
+        { type: 'image_url', image_url: { url: imageUrl } }
+      ],
+      generate_audio: true,
+      ratio: 'adaptive',
+      duration: 5,
+      watermark: false
+    })
+  });
+  if (!cr.ok) {
+    const err = await cr.text();
+    throw new Error('创建任务失败 ' + cr.status + ' ' + err.slice(0, 120));
+  }
+  const cj = await cr.json();
+  const taskId = cj.id;
+  if (!taskId) throw new Error('没有拿到任务 id');
+
+  const id = uid();
+  for (let i = 0; i < 60; i++) {
+    await sleep(5000);
+    $('loadSub').textContent = `视频生成中… 已等待 ${(i + 1) * 5} 秒，请不要关掉页面`;
+    const pr = await fetch('https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks/' + taskId, {
+      headers: { 'Authorization': 'Bearer ' + key }
+    });
+    if (!pr.ok) continue;
+    const pj = await pr.json();
+    if (pj.status === 'succeeded') {
+      return { id, video_url: pj.content?.video_url };
+    }
+    if (pj.status === 'failed' || pj.status === 'cancelled') {
+      throw new Error('任务' + pj.status);
+    }
+  }
+  throw new Error('等待超时（5分钟）');
+}
+
+/* 保存到本机 */
+function saveMemory(rec, videoUrl) {
+  const list = LS.get(KEYS.memories, []);
+  list.push(rec);
+  LS.set(KEYS.memories, list);
+
+  const allC = LS.get(KEYS.comments, {});
+  allC[rec.id] = allC[rec.id] || [];
+  LS.set(KEYS.comments, allC);
+
+  // 云端模式下补发一次（让服务器也存一份，便于家人扫码）
+  // 注意：云端 /api/generate 已经自己存了，这里不再重复
+  if (!cloudBase() && videoUrl === DEMO_VIDEO && rec.demo) {
+    // 纯本地模式演示，无需请求
+  }
+}
+
+/* ================= 结果页 + 二维码 ================= */
+function showResult(m) {
+  goScreen('scResult');
+  const v = $('resultVideo');
+  v.src = m.video_url || '';
+  $('saveBtn').href = m.video_url || '#';
+
+  const link = buildShareLink(m);
+  $('qrNote').textContent = link;
+
+  let target = $('qrCanvas');
+  if (window.QRCode && typeof window.QRCode.toCanvas === 'function') {
+    QRCode.toCanvas(target, link, {
+      width: 260, margin: 2,
+      color: { dark: '#5a3825', light: '#ffffff' },
+      errorCorrectionLevel: 'L'
+    }).catch(() => { $('qrNote').textContent = '二维码生成失败，请直接复制下面的链接' + link; });
+  } else if (window.QRCode) {
+    if (target.tagName === 'CANVAS') {
+      const d = document.createElement('div');
+      d.id = 'qrCanvas';
+      d.style.cssText = 'display:inline-block;width:260px;height:260px';
+      target.parentNode.replaceChild(d, target);
+      target = d;
+    }
+    target.innerHTML = '';
+    new QRCode(target, {
+      text: link, width: 260, height: 260,
+      colorDark: '#5a3825', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.L : 0
+    });
+  } else {
+    $('qrNote').textContent = '（二维码库未加载）请复制链接：' + link;
+  }
+
+  if (location.protocol === 'file:') {
+    setTimeout(() => toast('当前是本地文件打开，家人手机扫这个码打不开。把 phone.html 放到任意网页托管，或填写云端地址即可。', 5000), 800);
+  }
+}
+
+function buildShareLink(m) {
+  const c = cloudBase();
+  if (c) return c + '/view.html?memory_id=' + m.id;
+  const payload = { i: m.id, t: (m.text || '').slice(0, 300), s: m.style || '', v: m.video_url || '' };
+  // file:// 打开时 origin 为 "null"，要退回完整路径
+  const self = (typeof location.origin === 'string' && location.origin !== 'null')
+    ? location.origin + location.pathname
+    : location.href.split('#')[0].split('?')[0];
+  return self + '#v=' + b64url(JSON.stringify(payload));
+}
+
+function b64url(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function unb64url(s) {
+  const t = s.replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(t);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function copyShare() {
+  const link = $('qrNote').textContent;
+  if (!link) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(() => toast('已复制 ✅')).catch(() => fallbackCopy(link));
+  } else fallbackCopy(link);
+}
+function fallbackCopy(txt) {
+  const ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); toast('已复制 ✅'); } catch (e) { toast('复制失败，请长按上面的链接'); }
+  document.body.removeChild(ta);
+}
+
+/* ================= 打开历史记忆 ================= */
+async function openMemory(id) {
+  const list = LS.get(KEYS.memories, []);
+  const m = list.find(x => x.id === id);
+  if (!m) { toast('找不到这条记忆'); return; }
+  S.viewing = m;
+  S.viewId = id;
+  renderView(m, LS.get(KEYS.comments, {})[id] || []);
+  goScreen('scView');
+
+  // 云端模式尝试拉最新评论
+  if (cloudBase()) {
+    try {
+      const r = await fetch(cloudBase() + '/api/memory/' + id);
+      if (r.ok) {
+        const d = await r.json();
+        const cs = (d.comments || []).map(c => ({
+          author: c.author, text: c.text, audio: c.audio_base64, created_at: c.created_at
+        }));
+        const all = LS.get(KEYS.comments, {});
+        all[id] = cs;
+        LS.set(KEYS.comments, all);
+        renderView(m, cs);
+      }
+    } catch (e) { /* 离线就显示本地缓存 */ }
+  }
+}
+
+function renderView(m, comments) {
+  $('viewVideo').src = m.video_url || '';
+  $('viewStyle').textContent = m.style || '';
+  $('viewText').textContent = m.text || '';
+  renderComments(comments || []);
+}
+
+function renderComments(comments) {
+  $('cmCount').textContent = comments.length;
+  if (!comments.length) {
+    $('cmList').innerHTML = '<div class="empty">还没有留言，快来留第一条吧 💌</div>';
+    return;
+  }
+  $('cmList').innerHTML = comments.map(c => `
+    <div class="cm">
+      <div class="hd"><span class="au">${esc(c.author || '家人')}</span><span>${fmtTime(c.created_at)}</span></div>
+      ${c.text ? `<div class="tx">${esc(c.text)}</div>` : ''}
+      ${c.audio ? `<audio controls preload="none" src="data:${c.mime || 'audio/webm'};base64,${c.audio}"></audio>` : ''}
+    </div>`).join('');
+}
+
+/* ================= 评论 ================= */
+async function sendText() {
+  const t = $('cmInput').value.trim();
+  if (!t || !S.viewId) return;
+  $('cmInput').value = '';
+  await postComment({ text: t });
+}
+
+let cMR = null, cChunks = [], cRec = false;
+
+const voiceBtn = $('voiceBtn');
+voiceBtn.addEventListener('touchstart', e => { e.preventDefault(); startVoiceComment(); }, { passive: false });
+voiceBtn.addEventListener('touchend', e => { e.preventDefault(); stopVoiceComment(); }, { passive: false });
+voiceBtn.addEventListener('touchcancel', e => { e.preventDefault(); stopVoiceComment(); }, { passive: false });
+voiceBtn.addEventListener('mousedown', e => { e.preventDefault(); startVoiceComment(); });
+window.addEventListener('mouseup', () => stopVoiceComment());
+
+async function startVoiceComment() {
+  if (cRec || !S.viewId) return;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mime = pickMime();
+    cMR = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    cChunks = [];
+    cMR.ondataavailable = ev => { if (ev.data && ev.data.size) cChunks.push(ev.data); };
+    cMR.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(cChunks, { type: cMR.mimeType || 'audio/webm' });
+      $('voiceBtn').classList.remove('on');
+      $('voiceLbl').textContent = '按住说';
+      await postComment({ audio: blob });
+    };
+    cMR.start();
+    cRec = true;
+    $('voiceBtn').classList.add('on');
+    $('voiceLbl').textContent = '松开发送';
+    toast('正在录音…');
+  } catch (e) {
+    toast('麦克风打不开：' + e.message);
+  }
+}
+function stopVoiceComment() {
+  if (!cRec) return;
+  cRec = false;
+  try { if (cMR && cMR.state !== 'inactive') cMR.stop(); } catch (e) {}
+}
+
+async function postComment({ text, audio }) {
+  const id = S.viewId;
+  if (!id) return;
+
+  const rec = { author: '家人', text: text || null, audio: null, mime: null, created_at: Date.now() };
+
+  // 音频转 base64（本地存一份，云端也存一份）
+  if (audio) {
+    try {
+      rec.audio = await blobToB64(audio);
+      rec.mime = audio.type || 'audio/webm';   // iOS 是 audio/mp4
+    } catch (e) {}
+  }
+
+  // 先写本地，保证刷新还在
+  const all = LS.get(KEYS.comments, {});
+  all[id] = all[id] || [];
+  all[id].push(rec);
+  const okLocal = LS.set(KEYS.comments, all);
+
+  // 云端模式：同步上报
+  if (cloudBase()) {
+    try {
+      const fd = new FormData();
+      fd.append('memory_id', id);
+      fd.append('author', '家人');
+      if (text) fd.append('text', text);
+      if (audio) fd.append('audio', audio, 'c.webm');
+      const r = await fetch(cloudBase() + '/api/comment', { method: 'POST', body: fd });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      toast('留言已发送 ✅');
+    } catch (e) {
+      toast('已存在本机，但同步到云端失败：' + e.message, 4000);
+    }
+  } else {
+    toast(okLocal ? '留言已保存 ✅（只在这部手机上）' : '存储空间不足');
+  }
+
+  if (S.viewing) renderView(S.viewing, all[id]);
+}
+
+/* ================= 设置 ================= */
+function openSettings() {
+  const s = getSettings();
+  $('setZhipu').value = s.zhipu || '';
+  $('setVolc').value = s.volc || '';
+  $('setCloud').value = s.cloud || '';
+  updateSetState();
+  goScreen('scSet');
+}
+function updateSetState() {
+  const c = cloudBase();
+  $('setState').innerHTML = c
+    ? `<span class="badge">在线同步模式</span> 家人扫码的留言会存到云端并回传`
+    : `<span class="badge off">纯本地模式</span> 数据只存这部手机，关掉页面也不会丢`;
+}
+function saveSettings() {
+  const s = {
+    zhipu: $('setZhipu').value.trim(),
+    volc: $('setVolc').value.trim(),
+    cloud: $('setCloud').value.trim()
+  };
+  saveSettingsToLS(s);
+  updateSetState();
+  toast('已保存 ✅');
+  goHome();
+}
+
+/* ================= 示例 ================= */
+function showDemo() {
+  const demo = {
+    id: 'demo-' + uid(),
+    text: DEMO_TEXT,
+    style: '怀旧',
+    video_url: DEMO_VIDEO,
+    thumb: '',
+    created_at: Date.now()
+  };
+  S.viewing = demo;
+  S.viewId = demo.id;
+  renderView(demo, [
+    { author: '儿子', text: '妈，看到这个视频好想您！', created_at: Date.now() - 3600000 },
+    { author: '女儿', text: '下次回家我们一起去看那棵槐树 🌳', created_at: Date.now() - 1800000 }
+  ]);
+  goScreen('scView');
+}
+
+/* ================= 启动：解析分享链接 ================= */
+function openFromHash() {
+  const h = location.hash;
+  if (!h || !h.startsWith('#v=')) return false;
+  try {
+    const p = JSON.parse(unb64url(h.slice(3)));
+    const m = { id: p.i, text: p.t, style: p.s, video_url: p.v, created_at: Date.now() };
+    S.viewing = m;
+    S.viewId = m.id;
+
+    // 本地已有的评论优先
+    const localC = (LS.get(KEYS.comments, {})[m.id]) || [];
+    renderView(m, localC);
+    goScreen('scView');
+
+    if (cloudBase()) {
+      fetch(cloudBase() + '/api/memory/' + m.id)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+          if (d && d.comments) {
+            const cs = d.comments.map(c => ({ author: c.author, text: c.text, audio: c.audio_base64, created_at: c.created_at }));
+            const all = LS.get(KEYS.comments, {});
+            all[m.id] = cs; LS.set(KEYS.comments, all);
+            renderView(m, cs);
+          }
+        }).catch(() => {});
+    }
+    return true;
+  } catch (e) {
+    console.warn('分享链接解析失败', e);
+    return false;
+  }
+}
+
+renderMemoryList();
+if (!openFromHash()) goScreen('scHome');
+
+// 从云端 view.html 跳回来时也认 memory_id
+const qsId = new URLSearchParams(location.search).get('memory_id');
+if (qsId && !location.hash) {
+  // 如果是本机已有记忆，直接打开
+  const m = LS.get(KEYS.memories, []).find(x => x.id === qsId);
+  if (m) openMemory(qsId);
+}
+</script>
+</body>
+</html>
